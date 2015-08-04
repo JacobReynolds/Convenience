@@ -1,0 +1,74 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.example.pny.grocery.createuser"
+    android:background="#1abc9c">
+
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/usernameText"
+        android:hint="Username"
+        android:background="#fff"
+        android:height="75dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="121dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:paddingLeft="10dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="75dp"
+        android:inputType="textPassword"
+        android:id="@+id/passwordText"
+        android:height="200dp"
+        android:hint="Password"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/usernameText"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:paddingLeft="10dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create user"
+        android:id="@+id/button4"
+        android:height="75dp"
+        android:width="150dp"
+        android:background="@drawable/smoothcorner"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="66dp"
+        android:onClick="createUser"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="75dp"
+        android:inputType="textPassword"
+        android:id="@+id/passwordVerifyText"
+        android:height="200dp"
+        android:hint="Verify password"
+        android:paddingLeft="10dp"
+        android:layout_below="@+id/passwordText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/passwordText"
+        android:layout_alignEnd="@+id/passwordText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/incorrectPassword"
+        android:layout_below="@+id/passwordVerifyText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+</RelativeLayout>
