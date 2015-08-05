@@ -4,80 +4,9 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.example.pny.grocery.MainActivity"
-    android:background="#1abc9c"
-    android:id="@+id/itemsList">
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/itemField"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:hint="Item"
-        android:background="#ffffff"
-        android:height="100px"
-        android:width="250dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="false"
-        android:minHeight="50dp"
-        android:paddingLeft="10px">
-
-    </EditText>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add item"
-        android:id="@+id/itemButton"
-        android:onClick="addItem"
-        android:background="#bdc3c7"
-        android:textColor="#2980b9"
-        android:layout_alignBottom="@+id/itemField"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/itemField"
-        android:layout_alignParentEnd="true"
-        android:layout_toRightOf="@+id/itemField"
-        android:layout_toEndOf="@+id/itemField" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="View items"
-        android:id="@+id/button"
-        android:onClick="viewItems"
-        android:background="#bdc3c7"
-        android:textColor="#2980b9"
-        android:layout_below="@+id/itemField"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="5dp" />
-
-    <ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/button"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:textColor="#ffffff"
-        android:width="100px"
-        android:height="100px"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_above="@+id/button3"
-        android:id="@+id/scrollView"
-        android:layout_centerVertical="true">
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:textColor="#ffffff"
-            android:id="@+id/displayItems"
-            android:textSize="16dp" />
-    </ScrollView>
+    tools:context="com.pny.pny.grocery.MainActivity"
+    android:id="@+id/itemsList"
+    android:background="#292F6B">
 
     <Button
         android:layout_width="wrap_content"
@@ -87,19 +16,97 @@
         android:onClick="logout"
         android:background="@drawable/smoothcorner"
         android:textColor="#ffffff"
+        android:width="200dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/scrollView"
-        android:layout_alignEnd="@+id/scrollView" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:height="75dp"
+        android:textSize="24dp"
+        android:textAllCaps="false"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Switch list"
         android:id="@+id/button6"
-        android:layout_below="@+id/scrollView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:onClick="switchList"
+        android:background="@drawable/smoothcorner"
+        android:width="200dp"
+        android:height="75dp"
+        android:layout_above="@+id/button3"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:textColor="#fff"
+        android:textSize="24dp"
+        android:textAllCaps="false"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View items"
+        android:id="@+id/viewItemsButton"
+        android:onClick="goToViewItems"
+        android:layout_above="@+id/button6"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/smoothcorner"
+        android:height="75dp"
+        android:width="200dp"
+        android:textColor="#fff"
+        android:textSize="24dp"
+        android:textAllCaps="false" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add items"
+        android:id="@+id/addItemsButton"
+        android:onClick="goToAddItems"
+        android:layout_above="@+id/viewItemsButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/smoothcorner"
+        android:height="75dp"
+        android:width="200dp"
+        android:textColor="#fff"
+        android:textSize="24dp"
+        android:textAllCaps="false"
+        android:focusableInTouchMode="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Convenience"
+        android:id="@+id/textView"
+        android:fontFamily="@string/abc_searchview_description_submit"
+        android:textSize="40dp"
+        android:textStyle="bold"
+        android:textColor="#fff"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="By: Jake Reynolds"
+        android:id="@+id/textView2"
+        android:textColor="#fff"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\?"
+        android:id="@+id/button11"
+        android:background="@drawable/questionmark"
         android:layout_alignParentBottom="true"
-        android:onClick="switchList" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="showHelp"/>
 
 </RelativeLayout>

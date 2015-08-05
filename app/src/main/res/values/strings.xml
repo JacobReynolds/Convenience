@@ -7,4 +7,6 @@
     <string name="title_activity_login">login</string>
     <string name="title_activity_create_user">createUser</string>
     <string name="title_activity_list_view">listView</string>
+    <string name="title_activity_additems">additems</string>
+    <string name="title_activity_viewitems">viewitems</string>
 </resources>
