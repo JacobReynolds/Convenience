@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1"
+    android:minWidth="300dp"
+    android:background="#BB000000">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/addListNickname"
+        android:layout_gravity="center_horizontal"
+        android:background="#AA000000"
+        android:textColor="#fff"
+        android:textColorHint="#fff"
+        android:hint="List nickname"
+        android:textSize="22dp"
+        android:height="75dp"
+        android:paddingLeft="10dp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create"
+        android:id="@+id/addListButton"
+        android:layout_marginTop="7.5dp"
+        android:layout_marginBottom="7.5dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/clickablebutton" />
+</LinearLayout>

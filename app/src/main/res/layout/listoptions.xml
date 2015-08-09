@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#BB000000"
+    android:padding="15dp"
+    android:minWidth="250dp">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Copy list hash"
+        android:id="@+id/copyListHash"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/clickablebutton"
+        android:layout_marginBottom="10dp"
+        android:padding="10dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set current list"
+        android:id="@+id/setCurrentList"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/clickablebutton"
+        android:layout_marginBottom="10dp"
+        android:padding="10dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete list"
+        android:id="@+id/deleteList"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/clickablebutton"
+        android:layout_marginBottom="10dp"
+        android:padding="10dp" />
+</LinearLayout>

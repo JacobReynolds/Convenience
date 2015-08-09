@@ -29,6 +29,7 @@ public class loginchooser extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.rightin, R.anim.rightout);
         setContentView(R.layout.activity_loginchooser);
 
         ParseUser currentUser = ParseUser.getCurrentUser();

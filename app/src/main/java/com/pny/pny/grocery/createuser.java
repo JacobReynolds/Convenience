@@ -16,42 +16,75 @@ import com.parse.SignUpCallback;
 
 
 public class createuser extends ActionBarActivity {
-    ParseUser user = new ParseUser();
+    //Declare the current user
+    ParseUser user = ParseUser.getCurrentUser();
 
+    //Back button, go back to main activity
     public void goBack(View view) {
         final Intent intent = new Intent(createuser.this, loginchooser.class);
         startActivity(intent);
     }
 
+    //Create a new user
     public void createUser(View view) {
-        EditText username = (EditText)findViewById(R.id.usernameText);
-        EditText password = (EditText)findViewById(R.id.passwordText);
+        //Get input fields
+        EditText usernameField = (EditText)findViewById(R.id.usernameText);
+        String username = usernameField.getText().toString();
+
+        EditText passwordField = (EditText)findViewById(R.id.passwordText);
+        String password = passwordField.getText().toString();
+
         EditText passwordVerify = (EditText)findViewById(R.id.passwordVerifyText);
-        TextView errorView = (TextView) findViewById(R.id.incorrectPassword);
-        if (!password.getText().toString().equals(passwordVerify.getText().toString())) {
+        final TextView errorView = (TextView) findViewById(R.id.incorrectPassword);
+
+        //Null checking, and comparing passwords
+        if (!password.equals(passwordVerify.getText().toString())) {
             errorView.setText("");
             errorView.setText("Passwords do not match, please try again.");
             return;
+        } else if(password.trim().length() == 0) {
+            errorView.setText("");
+            errorView.setText("Password must contain letters.");
+            return;
+        } else if (username.matches("")) {
+            errorView.setText("");
+            errorView.setText("Please enter a username.");
+        } else if (password.matches("")){
+            errorView.setText("");
+            errorView.setText("Please enter a password.");
         }
-        user.setUsername(username.getText().toString());
-        user.setPassword(password.getText().toString());
+
+        //Assign to the user
+        user.setUsername(username.toLowerCase());
+        user.setPassword(password);
         final Intent intent = new Intent(this, MainActivity.class);
 
+        //Sign up, once finished go to main activity.
         user.signUpInBackground(new SignUpCallback() {
             public void done(ParseException e) {
                 if (e == null) {
-                    ParseUser.becomeInBackground(ParseUser.getCurrentUser().getSessionToken(), new LogInCallback() {
+                    ParseUser.becomeInBackground(user.getSessionToken(), new LogInCallback() {
                         public void done(ParseUser user, ParseException e) {
                             if (user != null) {
+                                viewlists newDatabase = new viewlists();
+                                newDatabase.makeNewDatabase("My First List", false, 0);
+                                //This way MainActivity's onCreatem method can grab this
+                                user.put("currentListNickname", "My First List");
                                 startActivity(intent);
                             } else {
-                                // The token could not be validated.
+                                errorView.setText("");
+                                errorView.setText("Error, please try again.");
                             }
                         }
                     });
                 } else {
                     // Sign up didn't succeed. Look at the ParseException
                     // to figure out what went wrong
+                    switch(e.getCode()) {
+                        case 202:
+                            errorView.setText("");
+                            errorView.setText("Username already taken.");
+                    }
                 }
             }
         });
@@ -60,6 +93,8 @@ public class createuser extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.leftin, R.anim.leftout);
+
         setContentView(R.layout.activity_create_user);
     }
 

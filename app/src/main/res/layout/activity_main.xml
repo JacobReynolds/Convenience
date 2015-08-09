@@ -6,7 +6,7 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.pny.pny.grocery.MainActivity"
     android:id="@+id/itemsList"
-    android:background="#292F6B">
+    android:background="#1A3B4C">
 
     <Button
         android:layout_width="wrap_content"
@@ -14,8 +14,8 @@
         android:text="Logout"
         android:id="@+id/button3"
         android:onClick="logout"
-        android:background="@drawable/smoothcorner"
-        android:textColor="#ffffff"
+        android:background="@drawable/clickablebutton"
+        android:textColor="#1A3B4C"
         android:width="200dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
@@ -27,16 +27,16 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Switch list"
+        android:text="Lists"
         android:id="@+id/button6"
         android:onClick="switchList"
-        android:background="@drawable/smoothcorner"
+        android:background="@drawable/clickablebutton"
         android:width="200dp"
         android:height="75dp"
         android:layout_above="@+id/button3"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:textColor="#fff"
+        android:textColor="#1A3B4C"
         android:textSize="24dp"
         android:textAllCaps="false"
         />
@@ -50,10 +50,10 @@
         android:layout_above="@+id/button6"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:background="@drawable/smoothcorner"
+        android:background="@drawable/clickablebutton"
         android:height="75dp"
         android:width="200dp"
-        android:textColor="#fff"
+        android:textColor="#1A3B4C"
         android:textSize="24dp"
         android:textAllCaps="false" />
 
@@ -66,10 +66,10 @@
         android:layout_above="@+id/viewItemsButton"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:background="@drawable/smoothcorner"
+        android:background="@drawable/clickablebutton"
         android:height="75dp"
         android:width="200dp"
-        android:textColor="#fff"
+        android:textColor="#1A3B4C"
         android:textSize="24dp"
         android:textAllCaps="false"
         android:focusableInTouchMode="true"/>
@@ -87,26 +87,39 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="By: Jake Reynolds"
-        android:id="@+id/textView2"
-        android:textColor="#fff"
-        android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true" />
-
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="\?"
         android:id="@+id/button11"
-        android:background="@drawable/questionmark"
+        android:background="@drawable/clickablebutton"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:onClick="showHelp"/>
+        android:onClick="showHelp"
+        android:textColor="#000" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Current list: "
+        android:id="@+id/currentListText"
+        android:layout_below="@+id/textView"
+        android:layout_alignLeft="@+id/textView"
+        android:layout_alignStart="@+id/textView"
+        android:textColor="#fff" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Current user: "
+        android:id="@+id/currentUserText"
+        android:layout_below="@+id/currentListText"
+        android:layout_alignLeft="@+id/currentListText"
+        android:layout_alignStart="@+id/currentListText"
+        android:textColor="#fff" />
 
 </RelativeLayout>

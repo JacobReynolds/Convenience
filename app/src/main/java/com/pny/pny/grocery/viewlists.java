@@ -2,6 +2,7 @@ package com.pny.pny.grocery;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -24,6 +26,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -48,13 +51,10 @@ public class viewlists extends ActionBarActivity {
         LinearLayout listView = (LinearLayout) findViewById(R.id.listLinearLayout);
         if((listView).getChildCount() > 0)
             listView.removeAllViews();
-        if (databases == null) {
-            createDatabaseText();
-        } else {
+        if (databases != null) {
             for (int i = 0; i < databases.size(); i++) {
                 addDisplayItem(listView, databases.get(i).toString(), nicknames.get(i).toString());
             }
-            createDatabaseText();
         }
     }
 
@@ -63,7 +63,7 @@ public class viewlists extends ActionBarActivity {
         Button button = new Button(this);
         button.setText(nickname);
         button.setTextColor(Color.WHITE);
-        button.setBackground(getResources().getDrawable(R.drawable.smoothcorner));
+        button.setBackground(getResources().getDrawable(R.drawable.buttonunclicked));
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,44 +77,66 @@ public class viewlists extends ActionBarActivity {
     }
 
     private void displayListOptions(final String hash, final String nickname) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setItems(new CharSequence[]
-                        {"Copy list hash", "Set current list", "Delete list"},
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // The 'which' argument contains the index position
-                        // of the selected item
-                        switch (which) {
-                            case 0:
-                                copyListToClipboard(hash);
-                                break;
-                            case 1:
-                                user.put("currentList", hash);
-                                user.saveInBackground();
-                                final Intent intent = new Intent(viewlists.this, MainActivity.class);
-                                startActivity(intent);
-                                break;
-                            case 2:
-                                removeListFromUser(hash, nickname);
-                                break;
-                        }
-                    }
-                });
-        builder.create().show();
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.listoptions);
+        Button hashButton = (Button)dialog.findViewById(R.id.copyListHash);
+        Button setButton = (Button)dialog.findViewById(R.id.setCurrentList);
+        Button deleteButton = (Button)dialog.findViewById(R.id.deleteList);
+        hashButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                copyListToClipboard(hash);
+                dialog.dismiss();
+            }
+        });
+        setButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                user.put("currentList", hash);
+                user.put("currentListNickname", nickname);
+                user.saveEventually();
+                final Intent intent = new Intent(viewlists.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeListFromUser(hash, nickname);
+                dialog.dismiss();
+            }
+        });
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
     }
 
     private void removeListFromUser(String list, String nickname) {
         ArrayList lists = (ArrayList) user.get("databaseList");
+        if (lists.size() == 1) {
+            Context context = getApplicationContext();
+            CharSequence text = "Error: must have one list";
+            int duration = Toast.LENGTH_LONG;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+            return;
+        }
         for (int i = 0; i < lists.size(); i++) {
             if (lists.get(i).toString().equals(list)) {
-                lists.remove(i);
-                user.remove("currentList");
-                user.put("currentList", lists);
                 ArrayList nicknames = (ArrayList) user.get("nicknameList");
                 nicknames.remove(nickname);
+                lists.remove(i);
+                String test = user.get("currentList").toString();
+                if (list.equals(user.get("currentList").toString())){
+                    user.put("currentList", lists.get(0));
+                    user.put("currentListNickname", nicknames.get(0));
+                }
+                user.remove("databaseList");
+                user.put("databaseList", lists);
                 user.remove("nicknameList");
                 user.put("nicknameList", nicknames);
-                user.saveInBackground();
+                user.saveEventually();
                 showLists();
                 return;
             }
@@ -127,7 +149,7 @@ public class viewlists extends ActionBarActivity {
         clipboard.setText(list);
     }
 
-    public void makeNewDatabase(final String nickname) {
+    public void makeNewDatabase(final String nickname, final boolean redirect, final int count) {
         SecureRandom random = new SecureRandom();
         final String listHash = new BigInteger(130, random).toString(32);
 
@@ -138,8 +160,8 @@ public class viewlists extends ActionBarActivity {
                 if (e == null) {
                     //Since they are zero-indexed we can just take the current length
                     for (int i = 0; i < databaseNames.size(); i++) {
-                        if (databaseNames.get(i).toString().equals(listHash)) {
-                            makeNewDatabase(nickname);
+                        if (databaseNames.get(i).get("hash").toString().equals(listHash)) {
+                            makeNewDatabase(nickname, true, 0);
                             return;
                         }
                     }
@@ -154,12 +176,31 @@ public class viewlists extends ActionBarActivity {
                     nickList.add(nickname);
                     user.put("databaseList", list);
                     user.put("nicknameList", nickList);
-                    String test = list.get(list.size() - 1).toString();
                     user.put("currentList", list.get(list.size() - 1).toString());
-                    user.saveInBackground();
-                    realDatabaseList.saveInBackground();
-                    final Intent intent = new Intent(viewlists.this, MainActivity.class);
-                    startActivity(intent);
+                    user.put("currentListNickname", nickname);
+                    user.saveEventually();
+                    realDatabaseList.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e != null) {
+                                if (count > 5) {
+                                    Context context = getApplicationContext();
+                                    CharSequence text = "Error connecting to servers, please try again later";
+                                    int duration = Toast.LENGTH_LONG;
+
+                                    Toast toast = Toast.makeText(context, text, duration);
+                                    toast.show();
+                                } else {
+                                    makeNewDatabase(nickname, redirect, (count > -1 ? count + 1 : 0));
+                                }
+                            }
+                        }
+                    });
+                    if (redirect) {
+                        final Intent intent = new Intent(viewlists.this, MainActivity.class);
+                        startActivity(intent);
+                    }
+                    return;
                 } else {
                 }
             }
@@ -167,85 +208,112 @@ public class viewlists extends ActionBarActivity {
 
     }
 
-    public void createDatabaseText() {
-        LinearLayout ll = (LinearLayout)findViewById(R.id.listLinearLayout);
-
-        // add button
-        Button b = new Button(this);
-        b.setText("Create new list");
-        b.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        Button button = new Button(this);
-        b.setOnClickListener(new View.OnClickListener() {
+    public void addListDialog(View view) {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.addlist);
+        Button button = (Button)dialog.findViewById(R.id.addListButton);
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(viewlists.this);
-                final EditText input = new EditText(viewlists.this);
-// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                input.setHint("List nickname");
-                builder1.setView(input);
-                builder1.setCancelable(true);
-                builder1.setPositiveButton("Submit",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                makeNewDatabase(input.getText().toString());
-                                dialog.cancel();
-                            }
-                        });
-                builder1.setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
+                EditText nickname = (EditText) dialog.findViewById(R.id.addListNickname);
+                ArrayList nicknames = (ArrayList) user.get("nicknameList");
+                if (nicknames.contains(nickname.getText().toString())) {
+                    Context context = getApplicationContext();
+                    CharSequence text = "Nickname already used";
+                    int duration = Toast.LENGTH_LONG;
 
-                AlertDialog alert11 = builder1.create();
-                alert11.show();
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                    return;
+                } else if (nickname.getText().toString().matches("")) {
+                    Context context = getApplicationContext();
+                    CharSequence text = "Please enter a nickname";
+                    int duration = Toast.LENGTH_LONG;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                    return;
+                } else {
+                    makeNewDatabase(nickname.getText().toString(), true, 0);
+                    dialog.cancel();
+                }
             }
         });
-        ll.addView(b);
-        b = new Button(this);
-        b.setText("Add list");
-        b.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        button = new Button(this);
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(viewlists.this);
-                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                LinearLayout layout = new LinearLayout(viewlists.this);
-                layout.setOrientation(LinearLayout.VERTICAL);
-
-                final EditText hashBox = new EditText(viewlists.this);
-                hashBox.setHint("List hash");
-                layout.addView(hashBox);
-
-                final EditText nicknameBox = new EditText(viewlists.this);
-                nicknameBox.setHint("List nickname");
-                layout.addView(nicknameBox);
-                builder1.setView(layout);
-                builder1.setCancelable(true);
-                builder1.setPositiveButton("Submit",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                addList(hashBox.getText().toString(), nicknameBox.getText().toString(), dialog);
-                            }
-                        });
-                builder1.setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-                AlertDialog alert11 = builder1.create();
-                alert11.show();
-            }
-        });
-        ll.addView(b);
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
     }
 
-    private void addList(final String listHash, final String nickname, final DialogInterface dialog) {
+    public void joinListDialog(View view) {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.joinlist);
+        Button button = (Button)dialog.findViewById(R.id.joinListButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("databaseList");
+                query.selectKeys(Arrays.asList("hash"));
+                query.findInBackground(new FindCallback<ParseObject>() {
+                    public void done(List<ParseObject> databaseNames, ParseException e) {
+                        if (e == null) {
+                            EditText nickname = (EditText) dialog.findViewById(R.id.joinListNickname);
+                            EditText hash = (EditText) dialog.findViewById(R.id.joinListHash);
+                            ArrayList nicknames = (ArrayList) user.get("nicknameList");
+                            ArrayList databases = (ArrayList) user.get("databaseList");
+                            ArrayList validDatabases = new ArrayList();
+                            for (int i = 0; i < databaseNames.size(); i++) {
+                                validDatabases.add(databaseNames.get(i).get("hash").toString());
+                            }
+                            if (!validDatabases.contains(hash.getText().toString())) {
+                                Context context = getApplicationContext();
+                                CharSequence text = "Please enter a valid hash";
+                                int duration = Toast.LENGTH_LONG;
+
+                                Toast toast = Toast.makeText(context, text, duration);
+                                toast.show();
+                            } else if (nicknames.contains(nickname.getText().toString())) {
+                                Context context = getApplicationContext();
+                                CharSequence text = "Nickname already used";
+                                int duration = Toast.LENGTH_LONG;
+
+                                Toast toast = Toast.makeText(context, text, duration);
+                                toast.show();
+                            } else if (nickname.getText().toString().matches("")) {
+                                Context context = getApplicationContext();
+                                CharSequence text = "Please enter a nickname";
+                                int duration = Toast.LENGTH_LONG;
+
+                                Toast toast = Toast.makeText(context, text, duration);
+                                toast.show();
+                            } else if (hash.getText().toString().matches("")) {
+                                Context context = getApplicationContext();
+                                CharSequence text = "Please enter a hash";
+                                int duration = Toast.LENGTH_LONG;
+
+                                Toast toast = Toast.makeText(context, text, duration);
+                                toast.show();
+                            } else if (databases.contains(hash.getText().toString())) {
+                                Context context = getApplicationContext();
+                                CharSequence text = "List already joined";
+                                int duration = Toast.LENGTH_LONG;
+
+                                Toast toast = Toast.makeText(context, text, duration);
+                                toast.show();
+                            } else {
+                                addList(hash.getText().toString(), nickname.getText().toString());
+                                dialog.cancel();
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
+    }
+
+    public void addList(final String listHash, final String nickname) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("databaseList");
         query.selectKeys(Arrays.asList("hash"));
         query.findInBackground(new FindCallback<ParseObject>() {
@@ -254,7 +322,6 @@ public class viewlists extends ActionBarActivity {
                     //Since they are zero-indexed we can just take the current length
                     for (int i = 0; i < databaseNames.size(); i++) {
                         if (databaseNames.get(i).get("hash").toString().equals(listHash)) {
-                            dialog.cancel();
                             ArrayList list = (ArrayList) user.get("databaseList") != null ? (ArrayList) user.get("databaseList") : new ArrayList();
                             ArrayList nicknameList = (ArrayList) user.get("nicknameList") != null ? (ArrayList) user.get("nicknameList") : new ArrayList();
                             if(list.contains(listHash))
@@ -264,7 +331,8 @@ public class viewlists extends ActionBarActivity {
                             user.put("databaseList", list);
                             user.put("nicknameList", nicknameList);
                             user.put("currentList", list.get(list.size() - 1));
-                            user.saveInBackground();
+                            user.put("currentListNickname", nickname);
+                            user.saveEventually();
                             showLists();
                             return;
                         }
@@ -283,6 +351,7 @@ public class viewlists extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.leftin, R.anim.leftout);
         setContentView(R.layout.activity_viewlists);
 
         showLists();

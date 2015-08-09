@@ -25,7 +25,7 @@ public class login extends ActionBarActivity {
         EditText username = (EditText)findViewById(R.id.usernameText);
         EditText password = (EditText)findViewById(R.id.passwordText);
         final Intent intent = new Intent(this, MainActivity.class);
-        ParseUser.logInInBackground(username.getText().toString(), password.getText().toString(), new LogInCallback() {
+        ParseUser.logInInBackground(username.getText().toString().toLowerCase(), password.getText().toString(), new LogInCallback() {
             public void done(ParseUser user, ParseException e) {
                 if (user != null) {
                     startActivity(intent);
@@ -41,6 +41,7 @@ public class login extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.leftin, R.anim.leftout);
         setContentView(R.layout.activity_login);
     }
 

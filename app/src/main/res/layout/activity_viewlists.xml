@@ -5,7 +5,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.pny.pny.grocery.viewlists"
-    android:background="#292F6B"
+    android:background="#1A3B4C"
     android:id="@+id/listView">
 
     <ScrollView
@@ -35,10 +35,37 @@
         android:text="Back"
         android:id="@+id/button9"
         android:onClick="goBack"
-        android:background="@drawable/backbutton"
+        android:background="@drawable/clickablebutton"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        android:width="100dp"
+        android:textColor="#1A3B4C" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add List"
+        android:id="@+id/button12"
+        android:layout_alignTop="@+id/button9"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/clickablebutton"
+        android:onClick="addListDialog"
+        android:width="100dp"
+        android:textColor="#1A3B4C" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Join List"
+        android:id="@+id/button13"
+        android:layout_alignBottom="@+id/button12"
+        android:layout_alignRight="@+id/listScrollView"
+        android:layout_alignEnd="@+id/listScrollView"
+        android:background="@drawable/clickablebutton"
+        android:onClick="joinListDialog"
+        android:width="100dp"
+        android:textColor="#1A3B4C" />
 
 </RelativeLayout>

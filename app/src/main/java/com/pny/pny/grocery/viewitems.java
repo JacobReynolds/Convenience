@@ -2,6 +2,7 @@ package com.pny.pny.grocery;
 
 import android.annotation.TargetApi;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -11,9 +12,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.GetCallback;
@@ -22,6 +26,9 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -59,18 +66,18 @@ public class viewitems extends ActionBarActivity {
                     if (groceryList.size() == 0)
                         llview.addView(text);
                     for (int i = 0; i < groceryList.size(); i++) {
-                        String item = groceryList.get(i).get("item").toString();
+                        final String item = groceryList.get(i).get("item").toString();
                         final String description = groceryList.get(i).get("description").toString();
                         final String user = groceryList.get(i).get("user").toString();
                         final String objectId = groceryList.get(i).getObjectId();
                         Button button = new Button(viewitems.this);
                         button.setText(item);
-                        button.setBackground(getResources().getDrawable(R.drawable.smoothcorner));
+                        button.setBackground(getResources().getDrawable(R.drawable.buttonunclicked));
                         button.setTextColor(Color.WHITE);
                         button.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                displayListItemOptions(user, description, objectId);
+                                displayListItemOptions(user, description, item, objectId);
                             }
                         });
                         LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
@@ -86,23 +93,22 @@ public class viewitems extends ActionBarActivity {
         });
     }
 
-    private void displayListItemOptions(String user, String description, final String objectId) {
-        final Dialog builder = new Dialog(this);
-        builder.setCanceledOnTouchOutside(true);
-        builder.setTitle("Added by: " + user);
-        LinearLayout layout = new LinearLayout(this);
-        TextView layoutDescription = new TextView(this);
-        layoutDescription.setText(description);
-        layoutDescription.setTextSize(16);
-        layoutDescription.setSingleLine(false);
-        layoutDescription.setTypeface(Typeface.SANS_SERIF);
-        Button layoutButton = new Button(this);
-        layoutButton.setText("Delete item");
-        layoutButton.setTypeface(Typeface.SANS_SERIF);
-        layoutButton.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        layoutButton.setOnClickListener(new View.OnClickListener() {
+    private void displayListItemOptions(String user, String description, final String item, final String objectId) {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.itemoptions);
+        TextView itemTitle = (TextView)dialog.findViewById(R.id.itemTitle);
+        itemTitle.append(item);
+        TextView addedBy = (TextView)dialog.findViewById(R.id.itemAddedBy);
+        addedBy.append(user);
+        TextView itemDescription = (TextView)dialog.findViewById(R.id.itemDescription);
+        if (description.length() > 0){
+            itemDescription.append(description);
+        } else {
+            itemDescription.setText("");
+        }
+        Button button = (Button)dialog.findViewById(R.id.itemViewDelete);
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ParseQuery<ParseObject> query = ParseQuery.getQuery(ParseUser.getCurrentUser().get("currentList").toString());
@@ -113,8 +119,8 @@ public class viewitems extends ActionBarActivity {
                         } else {
                             try {
                                 object.delete();
-                                object.saveInBackground();
-                                builder.dismiss();
+                                object.saveEventually();
+                                dialog.dismiss();
                                 viewItems();
                             } catch (ParseException e1) {
                                 e1.printStackTrace();
@@ -122,14 +128,11 @@ public class viewitems extends ActionBarActivity {
                         }
                     }
                 });
+                    dialog.cancel();
             }
         });
-        layout.addView(layoutDescription);
-        layout.addView(layoutButton);
-        builder.addContentView(layout, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        builder.show();
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
     }
 
     public void deleteAll(View view) {
@@ -148,6 +151,7 @@ public class viewitems extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.leftin, R.anim.leftout);
         setContentView(R.layout.activity_viewitems);
 
         viewItems();
