@@ -7,7 +7,24 @@
     tools:context="com.pny.pny.grocery.additems"
     android:background="#1A3B4C"
     android:id="@+id/additems">
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:fillViewport="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_weight="1">
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,7 +40,9 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="false"
-        android:layout_marginTop="30dp"/>
+        android:layout_marginTop="30dp"
+        android:textColorHint="#A9A9A9"
+        android:textColor="#000" />
 
     <Button
         android:layout_width="wrap_content"
@@ -33,12 +52,13 @@
         android:onClick="addItem"
         android:background="@drawable/clickablebutton"
         android:textColor="#1A3B4C"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
         android:height="60dp"
         android:width="150dp"
+        android:layout_marginTop="20dp"
         android:textSize="24dp"
-        android:textAllCaps="false" />
+        android:textAllCaps="false"
+        android:layout_below="@+id/itemDescription"
+        android:layout_centerHorizontal="true" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -56,7 +76,9 @@
         android:linksClickable="false"
         android:gravity="top"
         android:height="100dp"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="20dp"
+        android:textColorHint="#A9A9A9"
+        android:textColor="#000" />
 
     <Button
         android:layout_width="wrap_content"
@@ -64,10 +86,13 @@
         android:text="Back"
         android:id="@+id/backButton"
         android:onClick="goBack"
+        android:background="@drawable/clickablebutton"
+        android:textColor="#1A3B4C"
+        android:width="85dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:background="@drawable/clickablebutton"
-        android:textColor="#1A3B4C" />
+        android:layout_alignParentStart="true" />
 
+        </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

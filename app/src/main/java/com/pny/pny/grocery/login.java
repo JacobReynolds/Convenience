@@ -15,17 +15,17 @@ import com.parse.ParseUser;
 
 
 public class login extends ActionBarActivity {
-
-    public void goBack(View view) {
-        final Intent intent = new Intent(login.this, loginchooser.class);
-        startActivity(intent);
-    }
-
+    //Login to a user profile
     public void login(View view) {
-        EditText username = (EditText)findViewById(R.id.usernameText);
-        EditText password = (EditText)findViewById(R.id.passwordText);
+        //Get input fields
+        EditText usernameField = (EditText)findViewById(R.id.usernameText);
+        String username = usernameField.getText().toString();
+
+        EditText passwordField = (EditText)findViewById(R.id.passwordText);
+        String password = passwordField.getText().toString();
+
         final Intent intent = new Intent(this, MainActivity.class);
-        ParseUser.logInInBackground(username.getText().toString().toLowerCase(), password.getText().toString(), new LogInCallback() {
+        ParseUser.logInInBackground(username.toLowerCase(), password, new LogInCallback() {
             public void done(ParseUser user, ParseException e) {
                 if (user != null) {
                     startActivity(intent);

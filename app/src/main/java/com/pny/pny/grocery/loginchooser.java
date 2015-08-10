@@ -8,19 +8,21 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.parse.LogInCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 
 
 public class loginchooser extends ActionBarActivity {
+    ParseUser user = ParseUser.getCurrentUser();
 
-
-
+    //Go to the login activity
     public void login (View view) {
         final Intent intent = new Intent(this, login.class);
         startActivity(intent);
     }
 
+    //Go to the create user activity
     public void createUser(View view) {
         final Intent intent = new Intent(this, createuser.class);
         startActivity(intent);
@@ -32,14 +34,16 @@ public class loginchooser extends ActionBarActivity {
         overridePendingTransition(R.anim.rightin, R.anim.rightout);
         setContentView(R.layout.activity_loginchooser);
 
-        ParseUser currentUser = ParseUser.getCurrentUser();
         final Intent intent = new Intent(this, MainActivity.class);
-        if (currentUser != null) {
-            ParseUser.becomeInBackground(currentUser.getSessionToken(), new LogInCallback() {
+
+        //If they are already signed in, go to their profile.
+        if (user != null) {
+            ParseUser.becomeInBackground(user.getSessionToken(), new LogInCallback() {
                 public void done(ParseUser user, ParseException e) {
                     if (user != null) {
                     } else {
-                        // The token could not be validated.
+                        toastDisplay display = new toastDisplay();
+                        display.display("Error signing in, please try again", getApplicationContext());
                     }
                 }
             });

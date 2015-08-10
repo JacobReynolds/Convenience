@@ -7,8 +7,8 @@ android {
         applicationId "com.pny.pny.grocery"
         minSdkVersion 15
         targetSdkVersion 22
-        versionCode 3
-        versionName '2.2'
+        versionCode 4
+        versionName '2.3'
     }
     buildTypes {
         release {

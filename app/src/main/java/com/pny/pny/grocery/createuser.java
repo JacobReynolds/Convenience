@@ -17,13 +17,7 @@ import com.parse.SignUpCallback;
 
 public class createuser extends ActionBarActivity {
     //Declare the current user
-    ParseUser user = ParseUser.getCurrentUser();
-
-    //Back button, go back to main activity
-    public void goBack(View view) {
-        final Intent intent = new Intent(createuser.this, loginchooser.class);
-        startActivity(intent);
-    }
+    ParseUser user = new ParseUser();
 
     //Create a new user
     public void createUser(View view) {

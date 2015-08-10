@@ -37,20 +37,29 @@ import java.util.List;
 
 public class viewlists extends ActionBarActivity {
     ParseUser user = ParseUser.getCurrentUser();
+    final toastDisplay toast = new toastDisplay();
 
+    //Back button, go back to main activity
     public void goBack(View view) {
         final Intent intent = new Intent(viewlists.this, MainActivity.class);
         startActivity(intent);
     }
 
+    //Show all lists that belong to the user
     public void showLists() {
         ArrayList databases = new ArrayList();
         ArrayList nicknames = new ArrayList();
+
         databases = (ArrayList) user.get("databaseList");
         nicknames = (ArrayList) user.get("nicknameList");
+
         LinearLayout listView = (LinearLayout) findViewById(R.id.listLinearLayout);
+
+        //Make sure the list view is clear
         if((listView).getChildCount() > 0)
             listView.removeAllViews();
+
+        //Display the lists
         if (databases != null) {
             for (int i = 0; i < databases.size(); i++) {
                 addDisplayItem(listView, databases.get(i).toString(), nicknames.get(i).toString());
@@ -58,6 +67,7 @@ public class viewlists extends ActionBarActivity {
         }
     }
 
+    //Adds a list to the view
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void addDisplayItem (LinearLayout view, final String hash, final String nickname) {
         Button button = new Button(this);
@@ -70,19 +80,24 @@ public class viewlists extends ActionBarActivity {
                 displayListOptions(hash, nickname);
             }
         });
+
         LinearLayout.LayoutParams buttonLayoutParams = new  LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         buttonLayoutParams.setMargins(0, 0, 0, 20);
         button.setLayoutParams(buttonLayoutParams);
+
         view.addView(button);
     }
 
+    //Display the options for each list when clicked
     private void displayListOptions(final String hash, final String nickname) {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.listoptions);
+
         Button hashButton = (Button)dialog.findViewById(R.id.copyListHash);
         Button setButton = (Button)dialog.findViewById(R.id.setCurrentList);
         Button deleteButton = (Button)dialog.findViewById(R.id.deleteList);
+
         hashButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,6 +105,7 @@ public class viewlists extends ActionBarActivity {
                 dialog.dismiss();
             }
         });
+
         setButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,6 +116,7 @@ public class viewlists extends ActionBarActivity {
                 startActivity(intent);
             }
         });
+
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,58 +124,72 @@ public class viewlists extends ActionBarActivity {
                 dialog.dismiss();
             }
         });
+
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
 
+    //Remove the selected list from the user
+    //Todo: If the user is the only owner of this list, delete it from the database as well.
     private void removeListFromUser(String list, String nickname) {
         ArrayList lists = (ArrayList) user.get("databaseList");
-        if (lists.size() == 1) {
-            Context context = getApplicationContext();
-            CharSequence text = "Error: must have one list";
-            int duration = Toast.LENGTH_LONG;
 
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
+        //This prevents us from having to do tons of checks for empty list objects elsewhere.
+        if (lists.size() == 1) {
+            toast.display("Error: must have one list", getApplicationContext());
             return;
         }
+
+        //Remove the list
         for (int i = 0; i < lists.size(); i++) {
             if (lists.get(i).toString().equals(list)) {
                 ArrayList nicknames = (ArrayList) user.get("nicknameList");
                 nicknames.remove(nickname);
                 lists.remove(i);
-                String test = user.get("currentList").toString();
+
                 if (list.equals(user.get("currentList").toString())){
                     user.put("currentList", lists.get(0));
                     user.put("currentListNickname", nicknames.get(0));
                 }
+
                 user.remove("databaseList");
                 user.put("databaseList", lists);
+
                 user.remove("nicknameList");
                 user.put("nicknameList", nicknames);
-                user.saveEventually();
+
+                user.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e != null) {
+                            toast.display("Error removing list, please try again.", getApplicationContext());
+                        }
+                    }
+                });
                 showLists();
                 return;
             }
         }
     }
 
+    //Copy the list hash to the clipboard of the phone
     private void copyListToClipboard(String list) {
         @SuppressWarnings("deprecation")
         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         clipboard.setText(list);
     }
 
+    //Make a new database, with a secure hash
     public void makeNewDatabase(final String nickname, final boolean redirect, final int count) {
         SecureRandom random = new SecureRandom();
         final String listHash = new BigInteger(130, random).toString(32);
 
+        //Query for all the existing databases, and make sure we are creating a truly unique hash.
         ParseQuery<ParseObject> query = ParseQuery.getQuery("databaseList");
         query.selectKeys(Arrays.asList("hash"));
         query.findInBackground(new FindCallback<ParseObject>() {
             public void done(List<ParseObject> databaseNames, ParseException e) {
                 if (e == null) {
-                    //Since they are zero-indexed we can just take the current length
                     for (int i = 0; i < databaseNames.size(); i++) {
                         if (databaseNames.get(i).get("hash").toString().equals(listHash)) {
                             makeNewDatabase(nickname, true, 0);
@@ -167,29 +198,28 @@ public class viewlists extends ActionBarActivity {
                     }
                     ParseObject realDatabaseList = new ParseObject("databaseList");
                     realDatabaseList.put("hash", listHash);
+
                     //Having issues storying key-value pairs
                     //So since they save async, they will always be in the same array positions
                     //This will work until I find a fix
                     ArrayList list = (ArrayList) user.get("databaseList") != null ? (ArrayList) user.get("databaseList") : new ArrayList();
                     ArrayList nickList = (ArrayList) user.get("nicknameList") != null ? (ArrayList) user.get("nicknameList") : new ArrayList();
+
                     list.add(listHash);
                     nickList.add(nickname);
+
                     user.put("databaseList", list);
                     user.put("nicknameList", nickList);
                     user.put("currentList", list.get(list.size() - 1).toString());
                     user.put("currentListNickname", nickname);
                     user.saveEventually();
+
                     realDatabaseList.saveInBackground(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
                             if (e != null) {
                                 if (count > 5) {
-                                    Context context = getApplicationContext();
-                                    CharSequence text = "Error connecting to servers, please try again later";
-                                    int duration = Toast.LENGTH_LONG;
-
-                                    Toast toast = Toast.makeText(context, text, duration);
-                                    toast.show();
+                                    toast.display("Error connecting to servers, please try again later", getApplicationContext());
                                 } else {
                                     makeNewDatabase(nickname, redirect, (count > -1 ? count + 1 : 0));
                                 }
@@ -202,16 +232,19 @@ public class viewlists extends ActionBarActivity {
                     }
                     return;
                 } else {
+                    toast.display("Error connecting to servers, please try again later", getApplicationContext());
                 }
             }
         });
 
     }
 
+    //The dialog for adding a list
     public void addListDialog(View view) {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.addlist);
+
         Button button = (Button)dialog.findViewById(R.id.addListButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -219,20 +252,10 @@ public class viewlists extends ActionBarActivity {
                 EditText nickname = (EditText) dialog.findViewById(R.id.addListNickname);
                 ArrayList nicknames = (ArrayList) user.get("nicknameList");
                 if (nicknames.contains(nickname.getText().toString())) {
-                    Context context = getApplicationContext();
-                    CharSequence text = "Nickname already used";
-                    int duration = Toast.LENGTH_LONG;
-
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
+                    toast.display("Nickname already used", getApplicationContext());
                     return;
                 } else if (nickname.getText().toString().matches("")) {
-                    Context context = getApplicationContext();
-                    CharSequence text = "Please enter a nickname";
-                    int duration = Toast.LENGTH_LONG;
-
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
+                    toast.display("Please enter a nickname", getApplicationContext());
                     return;
                 } else {
                     makeNewDatabase(nickname.getText().toString(), true, 0);
@@ -240,14 +263,17 @@ public class viewlists extends ActionBarActivity {
                 }
             }
         });
+
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
 
+    //The dialog for joining a list
     public void joinListDialog(View view) {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.joinlist);
+
         Button button = (Button)dialog.findViewById(R.id.joinListButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -257,51 +283,32 @@ public class viewlists extends ActionBarActivity {
                 query.findInBackground(new FindCallback<ParseObject>() {
                     public void done(List<ParseObject> databaseNames, ParseException e) {
                         if (e == null) {
-                            EditText nickname = (EditText) dialog.findViewById(R.id.joinListNickname);
-                            EditText hash = (EditText) dialog.findViewById(R.id.joinListHash);
+                            EditText nicknameField = (EditText) dialog.findViewById(R.id.joinListNickname);
+                            String nickname = nicknameField.getText().toString();
+
+                            //Haha, hash field
+                            EditText hashField = (EditText) dialog.findViewById(R.id.joinListHash);
+                            String hash = hashField.getText().toString();
+
                             ArrayList nicknames = (ArrayList) user.get("nicknameList");
                             ArrayList databases = (ArrayList) user.get("databaseList");
                             ArrayList validDatabases = new ArrayList();
+
                             for (int i = 0; i < databaseNames.size(); i++) {
                                 validDatabases.add(databaseNames.get(i).get("hash").toString());
                             }
-                            if (!validDatabases.contains(hash.getText().toString())) {
-                                Context context = getApplicationContext();
-                                CharSequence text = "Please enter a valid hash";
-                                int duration = Toast.LENGTH_LONG;
-
-                                Toast toast = Toast.makeText(context, text, duration);
-                                toast.show();
-                            } else if (nicknames.contains(nickname.getText().toString())) {
-                                Context context = getApplicationContext();
-                                CharSequence text = "Nickname already used";
-                                int duration = Toast.LENGTH_LONG;
-
-                                Toast toast = Toast.makeText(context, text, duration);
-                                toast.show();
-                            } else if (nickname.getText().toString().matches("")) {
-                                Context context = getApplicationContext();
-                                CharSequence text = "Please enter a nickname";
-                                int duration = Toast.LENGTH_LONG;
-
-                                Toast toast = Toast.makeText(context, text, duration);
-                                toast.show();
-                            } else if (hash.getText().toString().matches("")) {
-                                Context context = getApplicationContext();
-                                CharSequence text = "Please enter a hash";
-                                int duration = Toast.LENGTH_LONG;
-
-                                Toast toast = Toast.makeText(context, text, duration);
-                                toast.show();
-                            } else if (databases.contains(hash.getText().toString())) {
-                                Context context = getApplicationContext();
-                                CharSequence text = "List already joined";
-                                int duration = Toast.LENGTH_LONG;
-
-                                Toast toast = Toast.makeText(context, text, duration);
-                                toast.show();
+                            if (!validDatabases.contains(hash)) {
+                                toast.display("Please enter a valid hash", getApplicationContext());
+                            } else if (nicknames.contains(nickname)) {
+                                toast.display("Nickname already used", getApplicationContext());
+                            } else if (nickname.matches("")) {
+                                toast.display("Please enter a nickname", getApplicationContext());
+                            } else if (hash.matches("")) {
+                                toast.display("Please enter a hash", getApplicationContext());
+                            } else if (databases.contains(hash)) {
+                                toast.display("List already joined", getApplicationContext());
                             } else {
-                                addList(hash.getText().toString(), nickname.getText().toString());
+                                addList(hash, nickname);
                                 dialog.cancel();
                             }
                         }
@@ -309,10 +316,12 @@ public class viewlists extends ActionBarActivity {
                 });
             }
         });
+
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
 
+    //Add the list to the user profile
     public void addList(final String listHash, final String nickname) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("databaseList");
         query.selectKeys(Arrays.asList("hash"));
@@ -337,12 +346,7 @@ public class viewlists extends ActionBarActivity {
                             return;
                         }
                     }
-                        Context context = getApplicationContext();
-                        CharSequence text = "Invalid list name";
-                        int duration = Toast.LENGTH_SHORT;
-
-                        Toast toast = Toast.makeText(context, text, duration);
-                        toast.show();
+                    toast.display("Invalid list name", getApplicationContext());
                 }
             }
         });
