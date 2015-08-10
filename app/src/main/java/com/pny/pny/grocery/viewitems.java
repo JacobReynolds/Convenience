@@ -100,7 +100,7 @@ public class viewitems extends ActionBarActivity {
                         llview.addView(button);
                     }
                 } else {
-                    text.setText("Error retrieving data, please try again.  Most likely no list");
+                    text.setText("Error retrieving data, there seems to be an error with the list.  Please try creating a new one.");
                     llview.addView(text);
                 }
             }
